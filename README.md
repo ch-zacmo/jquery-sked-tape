@@ -3,6 +3,8 @@ Schedule component for jQuery that represents events in tape manner.
 
 [DEMO](https://lexkrstn.github.io/jquery-sked-tape/)
 
+Forked from : [lexkrstn/jquery-sked-tape](https://github.com/lexkrstn/jquery-sked-tape)
+
 ### API
 
 #### Initialization
@@ -75,6 +77,7 @@ var $sked = $('#sked').skedTape({
 - `start`, `end` (_Date_)
 - `url` (_string_) If set the entry will be rendered as anchor with href=url.
 - `className` (_string_) Additional class name for stylizing purposes.
+- `style` (_object_) Additional style for stylizing purposes.
 - `disabled` (_bool_) Adds the `sked-tape__event--disabled` class. Default is false.
 - `data` (_object_) The data to set with `$.data()` method. The `eventId` is reserved.
 - `userData` (_object_) Any custom data you may store here.
