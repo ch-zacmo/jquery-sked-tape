@@ -1,6 +1,6 @@
 var CURRENT_TZ_OFFSET = new Date().getTimezoneOffset();
 
-var SkedTape = function(opts) {
+var SkedTape = function (opts) {
 	$.extend(this, opts);
 
 	this.$el = opts && opts.el ? $(opts.el) : $('<div/>');
@@ -37,7 +37,7 @@ SkedTape.defaultFormatters = {
 	 * @param {String} delim Date component delimiter.
 	 *                       Default - '/' or '.' depending on `endian`'s value.
 	 */
-	date: function(date, endian, delim) {
+	date: function (date, endian, delim) {
 		endian = endian || 'm';
 		delim = delim || (endian === 'm' ? '/' : '.');
 		var nums = [date.getDate(), date.getMonth() + 1, date.getFullYear()];
@@ -46,7 +46,7 @@ SkedTape.defaultFormatters = {
 		}
 		return nums.join(delim);
 	},
-	roundDuration: function(ms) {
+	roundDuration: function (ms) {
 		return ms;
 	},
 	duration: function (ms, opts) {
@@ -71,7 +71,7 @@ SkedTape.defaultFormatters = {
 
 SkedTape.prototype = {
 	constructor: SkedTape,
-	setTimespan: function(start, end, opts) {
+	setTimespan: function (start, end, opts) {
 		if (!isValidTimeRange(start, end)) {
 			throw new Error('Invalid time range: ' + JSON.stringify([start, end]));
 		}
@@ -83,7 +83,7 @@ SkedTape.prototype = {
 	 * A shorthand for `setTimespan()` that sets timespan between some
 	 * specified hours (optional) of a particular date.
 	 */
-	setDate: function(date, minHours, maxHours) {
+	setDate: function (date, minHours, maxHours) {
 		var midnight = new Date(date);
 		midnight.setHours(0, 0, 0, 0);
 		var start = new Date(midnight);
@@ -96,10 +96,10 @@ SkedTape.prototype = {
 		}
 		return this.setTimespan(start, end);
 	},
-	getZoom: function() {
+	getZoom: function () {
 		return this.zoom;
 	},
-	setZoom: function(zoom) {
+	setZoom: function (zoom) {
 		zoom = zoom || 1;
 		if (zoom < 1) {
 			this.zoom = 1;
@@ -116,18 +116,18 @@ SkedTape.prototype = {
 		}
 		return this;
 	},
-	resetZoom: function() {
+	resetZoom: function () {
 		return this.setZoom();
 	},
-	zoomIn: function(inc) {
+	zoomIn: function (inc) {
 		return this.setZoom(this.zoom + (inc || this.zoomStep));
 	},
-	zoomOut: function(dec) {
+	zoomOut: function (dec) {
 		return this.setZoom(this.zoom - (dec || this.zoomStep));
 	},
-	locationExists: function(id) {
+	locationExists: function (id) {
 		var exists = false;
-		$.each(this.locations, function(i, location) {
+		$.each(this.locations, function (i, location) {
 			if (location.id == id) {
 				exists = true;
 				return false;
@@ -135,9 +135,9 @@ SkedTape.prototype = {
 		});
 		return exists;
 	},
-	setLocations: function(locations, opts) {
+	setLocations: function (locations, opts) {
 		this.events = [];
-		this.locations = locations && locations.map(function(location) {
+		this.locations = locations && locations.map(function (location) {
 			return {
 				id: location.id,
 				name: location.name,
@@ -148,15 +148,15 @@ SkedTape.prototype = {
 		});
 		return this.updateUnlessOption(opts);
 	},
-	addLocations: function(locations, opts) {
+	addLocations: function (locations, opts) {
 		this.locations = this.locations.concat(locations);
 		return this.updateUnlessOption(opts);
 	},
-	addLocation: function(location, opts) {
+	addLocation: function (location, opts) {
 		this.locations.push(location);
 		return this.updateUnlessOption(opts);
 	},
-	removeLocation: function(id, opts) {
+	removeLocation: function (id, opts) {
 		// Remove corresponding events
 		for (var i = this.events.length - 1; i >= 0; --i) {
 			if (this.events[i].location == id) {
@@ -172,7 +172,7 @@ SkedTape.prototype = {
 		}
 		return this.updateUnlessOption(opts);
 	},
-	getLocation: function(id) {
+	getLocation: function (id) {
 		for (var i = 0; i < this.locations.length; ++i) {
 			if (this.locations[i].id == id) {
 				return this.locations[i];
@@ -180,23 +180,22 @@ SkedTape.prototype = {
 		}
 		return null;
 	},
-	getLocations: function() {
+	getLocations: function () {
 		var locations = this.locations;
 		if (this.sorting && this.orderBy === 'name') {
-			locations = locations.sort(function(a, b) {
+			locations = locations.sort(function (a, b) {
 				a = a.name.toLocaleLowerCase();
 				b = b.name.toLocaleLowerCase();
 				return a.localeCompare(b);
 			});
-		}
-		else if (this.sorting && this.orderBy === 'order') {
-			locations = locations.sort(function(a, b) {
+		} else if (this.sorting && this.orderBy === 'order') {
+			locations = locations.sort(function (a, b) {
 				return (a.order || 0) - (b.order || 0);
 			});
 		}
 		return locations;
 	},
-	collide: function(event) {
+	collide: function (event) {
 		for (var i = 0; i < this.events.length; ++i) {
 			if (event.location == this.events[i].location &&
 				gapBetween(event, this.events[i]) < this.minGapTimeBetween) {
@@ -205,7 +204,7 @@ SkedTape.prototype = {
 		}
 		return null;
 	},
-	addEvent: function(entry, opts) {
+	addEvent: function (entry, opts) {
 		if (!this.locationExists(entry.location)) {
 			throw new Error('Unknown location #' + entry.location);
 		}
@@ -227,11 +226,12 @@ SkedTape.prototype = {
 			data: entry.data ? $.extend({}, entry.data) : null,
 			url: entry.url || false,
 			className: entry.className || null,
+			style: entry.style || {},
 			disabled: entry.disabled || false,
 			active: entry.active || false,
 			userData: $.extend({}, entry.userData || {})
 		};
-		
+
 		if (opts && opts.preserveId && entry.id) {
 			if (this.getEvent(entry.id)) {
 				throw new Error('Cannot preserve id: already exists');
@@ -254,17 +254,19 @@ SkedTape.prototype = {
 
 		return newEvent;
 	},
-	addEvents: function(events, opts) {
-		events.forEach(function(event) {
-			this.addEvent(event, $.extend({}, {update: false}, opts));
+	addEvents: function (events, opts) {
+		events.forEach(function (event) {
+			this.addEvent(event, $.extend({}, {
+				update: false
+			}, opts));
 		}, this);
 		return this.updateUnlessOption(opts);
 	},
-	setEvents: function(entries, opts) {
+	setEvents: function (entries, opts) {
 		return this.removeAllEvents(opts).addEvents(entries, opts);
 	},
-	removeEvent: function(eventId, opts) {
-		$.each(this.events, $.proxy(function(i, event) {
+	removeEvent: function (eventId, opts) {
+		$.each(this.events, $.proxy(function (i, event) {
 			if (event.id == eventId) {
 				this.events.splice(i, 1);
 				return false;
@@ -272,17 +274,17 @@ SkedTape.prototype = {
 		}, this));
 		return this.updateUnlessOption(opts);
 	},
-	removeAllEvents: function(opts) {
+	removeAllEvents: function (opts) {
 		this.$el.find('.sked-tape__event, .sked-tape__gap').remove();
 		this.events = [];
 		return this.updateUnlessOption(opts);
 	},
-	getEvents: function() {
+	getEvents: function () {
 		return this.events;
 	},
-	getEvent: function(id) {
+	getEvent: function (id) {
 		var found = null;
-		$.each(this.events, $.proxy(function(i, event) {
+		$.each(this.events, $.proxy(function (i, event) {
 			if (event.id == id) {
 				found = event;
 				return false;
@@ -290,19 +292,19 @@ SkedTape.prototype = {
 		}, this));
 		return found;
 	},
-	isEditMode: function() {
+	isEditMode: function () {
 		return this.editMode;
 	},
-	enterEditMode: function() {
+	enterEditMode: function () {
 		this.editMode = true;
 		return this;
 	},
-	leaveEditMode: function() {
+	leaveEditMode: function () {
 		this.isAdding() && this.cancelAdding();
 		this.editMode = false;
 		return this;
 	},
-	startAdding: function(dummyEvent) {
+	startAdding: function (dummyEvent) {
 		this.dummyEvent = dummyEvent;
 		// Place on the last mouse position on the timeline
 		if (this.lastPicked) {
@@ -311,7 +313,7 @@ SkedTape.prototype = {
 		}
 		return this.rerenderLocations();
 	},
-	cancelAdding: function() {
+	cancelAdding: function () {
 		if (this.dummyEvent) {
 			// Add the dragged event back on the timeline
 			var draggedEvent = this.dummyEvent.draggedEvent;
@@ -322,7 +324,9 @@ SkedTape.prototype = {
 					allowCollisions: true,
 				});
 				var jqEvent = $.Event('event:dragCanceled.skedtape', {
-					detail: { event: draggedEvent }
+					detail: {
+						event: draggedEvent
+					}
 				});
 				this.$el.trigger(jqEvent, draggedEvent);
 			}
@@ -336,11 +340,11 @@ SkedTape.prototype = {
 		}
 		return this.rerenderLocations();
 	},
-	isAdding: function() {
+	isAdding: function () {
 		return !!this.dummyEvent;
 	},
-	rerenderLocation: function(id) {
-		var $location = this.$locations.filter(function() {
+	rerenderLocation: function (id) {
+		var $location = this.$locations.filter(function () {
 			return $(this).data('id') == id;
 		});
 		var location = this.getLocation(id);
@@ -348,37 +352,40 @@ SkedTape.prototype = {
 			$location.replaceWith(this.renderLocation(location));
 		}
 	},
-	rerenderLocations: function() {
+	rerenderLocations: function () {
 		this.$locations.empty().append(this.renderLocations());
 		return this;
 	},
-	renderLocation: function(location) {
+	renderLocation: function (location) {
 		var $text = $('<div class="sked-tape__location-text"/>')
 			.text(location.name);
 		var $location = $('<li class="sked-tape__location"/>')
-			.attr({'title': location.name, 'data-id': location.id})
+			.attr({
+				'title': location.name,
+				'data-id': location.id
+			})
 			.append($text);
-		var canAdd = this.isAdding()
-			? this.canAddIntoLocation(location, this.dummyEvent)
-			: undefined;
+		var canAdd = this.isAdding() ?
+			this.canAddIntoLocation(location, this.dummyEvent) :
+			undefined;
 		this.postRenderLocation($text, location, canAdd);
 		return $location;
 	},
-	renderLocations: function() {
+	renderLocations: function () {
 		var $frag = $(document.createDocumentFragment());
-		$.each(this.getLocations(), $.proxy(function(i, location) {
+		$.each(this.getLocations(), $.proxy(function (i, location) {
 			this.renderLocation(location).appendTo($frag);
 		}, this));
 		return $frag;
 	},
-	postRenderLocation: function($el, location,  canAdd) {
+	postRenderLocation: function ($el, location, canAdd) {
 		if (canAdd !== undefined) {
 			$el.parent()
 				.toggleClass('sked-tape__location--permitted', canAdd)
 				.toggleClass('sked-tape__location--forbidden', !canAdd);
 		}
 	},
-	renderAside: function() {
+	renderAside: function () {
 		var $aside = $('<div class="sked-tape__aside"/>');
 		$('<div class="sked-tape__caption"/>').text(this.caption).appendTo($aside);
 		this.$locations = $('<ul class="sked-tape__locations"/>')
@@ -386,7 +393,7 @@ SkedTape.prototype = {
 			.appendTo($aside);
 		this.$el.append($aside);
 	},
-	renderTimeWrap: function(oldScroll) {
+	renderTimeWrap: function (oldScroll) {
 		var $hours = this.renderHours();
 		var $wrap = $('<div class="sked-tape__time-wrap"/>').appendTo(this.$el);
 		this.$frame = $('<div class="sked-tape__time-frame" tabindex="0"/>')
@@ -408,14 +415,17 @@ SkedTape.prototype = {
 			this.$canvas.prepend(this.renderDates());
 		}
 	},
-	renderDates: function() {
+	renderDates: function () {
 		var $ul = $('<ul class="sked-tape__dates"/>');
 		var firstMidnight = getMidnightAfter(this.start);
 		var lastMidnight = getMidnightBefore(this.end);
 		var queue = [];
 		if (firstMidnight > lastMidnight) {
 			// The range is within the same day
-			queue.push({weight: 1, text: this.format.date(this.start)})
+			queue.push({
+				weight: 1,
+				text: this.format.date(this.start)
+			})
 		} else {
 			queue.push({
 				weight: getMsToMidnight(this.start) / MS_PER_DAY,
@@ -423,7 +433,10 @@ SkedTape.prototype = {
 			});
 			for (var day = new Date(firstMidnight); day < lastMidnight;) {
 				day.setTime(day.getTime() + 1000);
-				queue.push({weight: 1, text: this.format.date(day)});
+				queue.push({
+					weight: 1,
+					text: this.format.date(day)
+				});
 				day.setTime(day.getTime() + MS_PER_DAY - 1000);
 			}
 			queue.push({
@@ -431,11 +444,11 @@ SkedTape.prototype = {
 				text: this.format.date(this.end)
 			});
 		}
-		var totalWeight = queue.reduce(function(total, item) {
+		var totalWeight = queue.reduce(function (total, item) {
 			return total + item.weight;
 		}, 0);
 		var duration = this.end.getTime() - this.start.getTime();
-		queue.forEach(function(item) {
+		queue.forEach(function (item) {
 			var proportion = item.weight / totalWeight;
 			$('<li/>')
 				.css('width', (proportion * 100).toFixed(10) + '%')
@@ -446,7 +459,7 @@ SkedTape.prototype = {
 		});
 		return $ul;
 	},
-	renderHours: function() {
+	renderHours: function () {
 		var $ul = $('<ul/>');
 
 		var tick = new Date(this.start);
@@ -458,7 +471,7 @@ SkedTape.prototype = {
 				.text(this.format.hours(hour === 24 ? 0 : hour));
 			$('<li/>').append($time).appendTo($ul);
 
-			tick.setTime(tick.getTime() + 60*60*1000);
+			tick.setTime(tick.getTime() + 60 * 60 * 1000);
 		}
 
 		var $li = $ul.children();
@@ -466,26 +479,26 @@ SkedTape.prototype = {
 
 		return $('<div class="sked-tape__hours"/>').append($ul);
 	},
-	renderGrid: function() {
+	renderGrid: function () {
 		var $ul = $('<ul class="sked-tape__grid"/>');
 		var tick = new Date(this.start);
 		while (tick.getTime() < this.end.getTime()) {
 			$('<li/>').appendTo($ul);
-			tick.setTime(tick.getTime() + 60*60*1000);
+			tick.setTime(tick.getTime() + 60 * 60 * 1000);
 		}
 		var $li = $ul.children();
 		$li.width(100 / $li.length + '%');
 		return $ul;
 	},
-	renderTimeRows: function() {
+	renderTimeRows: function () {
 		this.$timeline = $('<ul class="sked-tape__timeline"/>');
 		// Sort the events by time ascending so that the gap between each two of
 		// them may be determined in a cycle.
-		var events = this.events.sort($.proxy(function(a, b) {
+		var events = this.events.sort($.proxy(function (a, b) {
 			return a.start.getTime() - b.start.getTime();
 		}, this));
 		this.timeIndicators = {};
-		$.each(this.getLocations(), $.proxy(function(i, location) {
+		$.each(this.getLocations(), $.proxy(function (i, location) {
 			var $li = $('<li class="sked-tape__event-row"/>')
 				.data('locationId', location.id)
 				.appendTo(this.$timeline);
@@ -497,14 +510,15 @@ SkedTape.prototype = {
 			$li.append($timeIndicator);
 			// Render events
 			var intersections = this.getIntersections(location.id);
-			var lastEndTime = 0, lastEnd;
-			events.forEach(function(event) {
+			var lastEndTime = 0,
+				lastEnd;
+			events.forEach(function (event) {
 				var belongs = event.location == location.id;
 				var visible = event.end > this.start && event.start < this.end;
 				if (belongs && visible) {
 					var intersects = false;
-					$.each(intersections, $.proxy(function(i, intersection) {
-						$.each(intersection.events, function(j, jEvent) {
+					$.each(intersections, $.proxy(function (i, intersection) {
+						$.each(intersection.events, function (j, jEvent) {
 							if (jEvent.id == event.id) {
 								intersects = true;
 								return false;
@@ -523,8 +537,7 @@ SkedTape.prototype = {
 						$li.children('.sked-tape__event')
 							.filter(':eq(-1), :eq(-2)')
 							.addClass('sked-tape__event--low-gap');
-					}
-					else if (intersects) {
+					} else if (intersects) {
 						$event.addClass('sked-tape__event--low-gap');
 					}
 				}
@@ -533,15 +546,15 @@ SkedTape.prototype = {
 		this.renderIntersections();
 		return this.$timeline;
 	},
-	renderIntersections: function() {
+	renderIntersections: function () {
 		// Remove the stale ones
 		this.$timeline.find('.sked-tape__intersection').remove();
 		// Render the new ones
-		this.$timeline.find('.sked-tape__event-row').each($.proxy(function(i, row) {
+		this.$timeline.find('.sked-tape__event-row').each($.proxy(function (i, row) {
 			var $row = $(row);
 			var locationId = $row.data('locationId');
 			var intersections = this.getIntersections(locationId);
-			$.each(intersections, $.proxy(function(i, intersection) {
+			$.each(intersections, $.proxy(function (i, intersection) {
 				if (intersection.end > this.start && intersection.start < this.end) {
 					$('<div class="sked-tape__intersection"/>')
 						.css({
@@ -554,8 +567,11 @@ SkedTape.prototype = {
 			}, this));
 		}, this));
 	},
-	renderGap: function(gap, start, end) {
-		var block = {start: start, end: end};
+	renderGap: function (gap, start, end) {
+		var block = {
+			start: start,
+			end: end
+		};
 		var $text = $('<span class="sked-tape__gap-text"/>')
 			.text(Math.round(gap / MS_PER_MINUTE));
 		return $('<div class="sked-tape__gap"/>')
@@ -565,9 +581,9 @@ SkedTape.prototype = {
 			})
 			.append($text);
 	},
-	findEventJustBefore: function(event) {
+	findEventJustBefore: function (event) {
 		var found = null;
-		$.each(this.events, function(index, iEvent) {
+		$.each(this.events, function (index, iEvent) {
 			if (
 				iEvent.location == event.location &&
 				iEvent.end < event.start &&
@@ -578,9 +594,9 @@ SkedTape.prototype = {
 		});
 		return found;
 	},
-	findEventJustAfter: function(event) {
+	findEventJustAfter: function (event) {
 		var found = null;
-		$.each(this.events, function(index, iEvent) {
+		$.each(this.events, function (index, iEvent) {
 			if (
 				iEvent.location == event.location &&
 				iEvent.start > event.end &&
@@ -591,7 +607,7 @@ SkedTape.prototype = {
 		});
 		return found;
 	},
-	updateDummyEvent: function() {
+	updateDummyEvent: function () {
 		if (!this.isAdding()) {
 			// Remove its node from the timline
 			if (this.$dummyEvent) {
@@ -650,7 +666,7 @@ SkedTape.prototype = {
 		var $eventRow = this.$dummyEvent.closest('.sked-tape__event-row');
 		if (!$eventRow.length || $eventRow.data('locationId') != event.location) {
 			this.$dummyEvent.remove();
-			$eventRow = this.$el.find('.sked-tape__event-row').filter(function() {
+			$eventRow = this.$el.find('.sked-tape__event-row').filter(function () {
 				return $(this).data('locationId') == event.location;
 			});
 			if ($eventRow.length) {
@@ -658,11 +674,11 @@ SkedTape.prototype = {
 			}
 		}
 	},
-	updateEvent: function(eventId) {
+	updateEvent: function (eventId) {
 		var event = this.getEvent(eventId);
 		var $oldEvent = this.$timeline
 			.find('.sked-tape__event')
-			.filter(function() {
+			.filter(function () {
 				return $(this).data('eventId') == eventId;
 			});
 		if (event && $oldEvent.length) {
@@ -675,7 +691,7 @@ SkedTape.prototype = {
 			this.update();
 		}
 	},
-	renderEvent: function(event) {
+	renderEvent: function (event) {
 		// Create event node
 		if (event.url && !event.disabled) {
 			var $event = $('<a/>').attr('href', event.url);
@@ -686,14 +702,18 @@ SkedTape.prototype = {
 		if (event.className) {
 			$event.addClass(event.className);
 		}
+
+		// Apply the style
+		const css = $.extend({}, event.style, {
+			width: this.computeEventWidth(event),
+			left: this.computeEventOffset(event)
+		});
+
 		$event
 			.toggleClass('sked-tape__event--disabled', !!event.disabled)
 			.toggleClass('sked-tape__event--active', !!event.active)
 			.attr('title', event.name)
-			.css({
-				width: this.computeEventWidth(event),
-				left: this.computeEventOffset(event)
-			});
+			.css(css);
 		// Append the center aligner node with text context
 		var $center = $('<div class="sked-tape__center"/>')
 			.text(event.name)
@@ -702,8 +722,8 @@ SkedTape.prototype = {
 			var html = $center.html();
 			var duration = this.format.roundDuration(event.end - event.start);
 			if (this.showEventTime) {
-				html += '<br>' + this.format.time(event.start)
-					+ ' - ' + this.format.time(new Date(event.start.getTime() + duration));
+				html += '<br>' + this.format.time(event.start) +
+					' - ' + this.format.time(new Date(event.start.getTime() + duration));
 			}
 			if (this.showEventDuration) {
 				html += '<br>' + this.format.duration(duration);
@@ -711,7 +731,9 @@ SkedTape.prototype = {
 			$center.html(html);
 		}
 		// Bind data-*
-		$event.data($.extend({}, {eventId: event.id}, event.data));
+		$event.data($.extend({}, {
+			eventId: event.id
+		}, event.data));
 		// Measure minimum content width to detect whether to attach popover further
 		var $loose = $event.clone()
 			.css({
@@ -727,21 +749,21 @@ SkedTape.prototype = {
 
 		return $event;
 	},
-	computeEventWidth: function(event) {
+	computeEventWidth: function (event) {
 		// Clamp to timeline edge
 		var eventEnd = this.end < event.end ? this.end : event.end;
 		var durationHours = getDurationHours(event.start, eventEnd);
 		return durationHours / getDurationHours(this.start, this.end) * 100 + '%';
 	},
-	computeEventOffset: function(event) {
-		var hoursBeforeEvent =  getDurationHours(this.start, event.start);
-		return hoursBeforeEvent /  getDurationHours(this.start, this.end) * 100 + '%';
+	computeEventOffset: function (event) {
+		var hoursBeforeEvent = getDurationHours(this.start, event.start);
+		return hoursBeforeEvent / getDurationHours(this.start, this.end) * 100 + '%';
 	},
-	updateTimeIndicatorsPos: function() {
+	updateTimeIndicatorsPos: function () {
 		var start = this.start.getTime();
 		var end = this.end.getTime();
 		var utcNow = new Date().getTime();
-		Object.keys(this.timeIndicators).forEach(function(locationId) {
+		Object.keys(this.timeIndicators).forEach(function (locationId) {
 			var location = this.getLocation(locationId);
 			var tzOffset = location.tzOffset === undefined ? this.tzOffset : location.tzOffset;
 			var tzDiff = tzOffset - CURRENT_TZ_OFFSET;
@@ -759,7 +781,7 @@ SkedTape.prototype = {
 	 * A helper might be required by the client to find out whether the tape
 	 * has intersecting events.
 	 */
-	hasIntersections: function() {
+	hasIntersections: function () {
 		var eventA, eventB, j;
 		for (var i = 0; i < this.events.length; i++) {
 			eventA = this.events[i];
@@ -778,9 +800,9 @@ SkedTape.prototype = {
 	/**
 	 * Returns event intersection list for a specified location.
 	 */
-	getIntersections: function(location) {
+	getIntersections: function (location) {
 		var intersections = [];
-		var occupied = function(intersection) {
+		var occupied = function (intersection) {
 			for (var i = 0; i < intersections.length; ++i) {
 				if (intersection.start.getTime() == intersections[i].start.getTime() &&
 					intersection.end.getTime() == intersections[i].end.getTime()) {
@@ -789,7 +811,7 @@ SkedTape.prototype = {
 			}
 			return false;
 		};
-		$.each(this.events, $.proxy(function(i, iEvent) {
+		$.each(this.events, $.proxy(function (i, iEvent) {
 			if (iEvent.location != location) {
 				return; // Skip all the events of the other locations
 			}
@@ -809,11 +831,11 @@ SkedTape.prototype = {
 		}, this));
 		return intersections;
 	},
-	destroy: function() {
+	destroy: function () {
 		this.cleanup();
 		this.$el.off().empty().removeClass('sked-tape sked-tape--has-dates');
 	},
-	cleanup: function() {
+	cleanup: function () {
 		if ($.fn.popover) {
 			this.$el.find('.sked-tape__event')
 				.popover(TWBS_MAJOR >= 4 ? 'dispose' : 'destroy');
@@ -823,9 +845,9 @@ SkedTape.prototype = {
 			delete this.indicatorTimeout;
 		}
 	},
-	render: function(opts) {
-		var oldScrollLeft = opts && opts.preserveScroll
-			&& this.$frame && this.$frame.scrollLeft();
+	render: function (opts) {
+		var oldScrollLeft = opts && opts.preserveScroll &&
+			this.$frame && this.$frame.scrollLeft();
 
 		this.cleanup();
 		this.$el.empty().addClass('sked-tape');
@@ -837,17 +859,17 @@ SkedTape.prototype = {
 		this.renderTimeWrap(oldScrollLeft);
 		this.updateTimeIndicatorsPos();
 
-		this.indicatorTimeout = setInterval($.proxy(function() {
+		this.indicatorTimeout = setInterval($.proxy(function () {
 			this.updateTimeIndicatorsPos();
 		}, this), 1000);
 
-		setTimeout($.proxy(function() {
+		setTimeout($.proxy(function () {
 			var bodyClass = TWBS_MAJOR >= 4 ? 'body' : 'content';
 			var template = '<div class="popover" role="tooltip">' +
 				'<div class="arrow"></div>' +
 				'<div class="popover-' + bodyClass + '"></div>' +
-			'</div>';
-			this.$el.find('.sked-tape__event').each($.proxy(function(i, el) {
+				'</div>';
+			this.$el.find('.sked-tape__event').each($.proxy(function (i, el) {
 				var $entry = $(el);
 				var tooSmall = $entry.width() < $entry.data('min-width');
 				var left = parseFloat($entry[0].style.left);
@@ -871,20 +893,22 @@ SkedTape.prototype = {
 
 		return this;
 	},
-	update: function() {
-		return this.render({preserveScroll: true});
+	update: function () {
+		return this.render({
+			preserveScroll: true
+		});
 	},
-	updateUnlessOption: function(opts) {
+	updateUnlessOption: function (opts) {
 		var requested = !opts || opts.update === undefined || opts.update;
 		return (this.$timeline && requested) ? this.update() : this;
 	},
-	setSnapToMins: function(mins) {
+	setSnapToMins: function (mins) {
 		this.snapToMins = mins;
 	},
-	findEventsAtTime: function(date, locationId) {
+	findEventsAtTime: function (date, locationId) {
 		var time = date.getTime();
 		var events = [];
-		$.each(this.getEvents(), function(i, event) {
+		$.each(this.getEvents(), function (i, event) {
 			if (event.location == locationId &&
 				event.start.getTime() <= time && event.end.getTime() >= time) {
 				events.push(event);
@@ -892,11 +916,11 @@ SkedTape.prototype = {
 		});
 		return events;
 	},
-	pick: function(e) {
+	pick: function (e) {
 		var scalar = (e.pageX - this.$timeline.offset().left) / this.$timeline.width();
 		var time = this.start.getTime() + scalar * (this.end.getTime() - this.start.getTime());
 		var locationId;
-		this.$el.find('.sked-tape__event-row').each(function() {
+		this.$el.find('.sked-tape__event-row').each(function () {
 			var top = $(this).offset().top;
 			var bottom = top + $(this).height();
 			if (e.pageY >= top && e.pageY <= bottom) {
@@ -909,7 +933,7 @@ SkedTape.prototype = {
 			date: new Date(Math.round(time))
 		};
 	},
-	makeMouseEvent: function(type, e, props) {
+	makeMouseEvent: function (type, e, props) {
 		return $.Event(type, $.extend({}, props, {
 			relatedTarget: e.currentTarget,
 			clientX: e.clientX,
@@ -923,20 +947,26 @@ SkedTape.prototype = {
 			detail: $.extend(this.pick(e), props.detail)
 		}));
 	},
-	dragEvent: function(eventId, e) {
+	dragEvent: function (eventId, e) {
 		e = e || {};
 		// Skip if some event is being dragged right now
 		if (this.isAdding()) return;
 		var event = this.getEvent(eventId);
 		// Make sure the event is allowed to be draggable
 		var jqEvent = this.makeMouseEvent('event:dragStart.skedtape', e, {
-			detail: { component: this, event: event }
+			detail: {
+				component: this,
+				event: event
+			}
 		});
 		this.$el.trigger(jqEvent, [this]);
 		if (!jqEvent.isDefaultPrevented()) {
 			// Emit an event delete event
 			var jqEvent = this.makeMouseEvent('event:dragStarted.skedtape', e, {
-				detail: { component: this, event: event }
+				detail: {
+					component: this,
+					event: event
+				}
 			});
 			this.$el.trigger(jqEvent, [this]);
 			// Remove it from the timeline and begin positioning
@@ -950,7 +980,7 @@ SkedTape.prototype = {
 			});
 		}
 	},
-	handleEventClick: function(e) {
+	handleEventClick: function (e) {
 		var eventId = $(e.currentTarget).data('eventId');
 		var event = this.getEvent(eventId);
 		if (this.isEditMode()) {
@@ -958,12 +988,15 @@ SkedTape.prototype = {
 		} else {
 			// Emit an event click event
 			var jqEvent = this.makeMouseEvent('event:click.skedtape', e, {
-				detail: { component: this, event: event }
+				detail: {
+					component: this,
+					event: event
+				}
 			});
 			this.$el.trigger(jqEvent, [this]);
 		}
 	},
-	handleEventContextMenu: function(e) {
+	handleEventContextMenu: function (e) {
 		e.preventDefault();
 		if (this.rmbCancelsAdding && this.isAdding()) {
 			return this.cancelAdding();
@@ -971,43 +1004,56 @@ SkedTape.prototype = {
 		var eventId = $(e.currentTarget).data('eventId');
 		var event = this.getEvent(eventId);
 		var jqEvent = this.makeMouseEvent('event:contextmenu.skedtape', e, {
-			detail: { component: this, event: event }
+			detail: {
+				component: this,
+				event: event
+			}
 		});
 		this.$el.trigger(jqEvent, [this]);
 	},
-	handleIntersectionClick: function(e) {
+	handleIntersectionClick: function (e) {
 		var jqEvent = this.makeMouseEvent('intersection:click.skedtape', e, {
-			detail: { component: this }
+			detail: {
+				component: this
+			}
 		});
 		var detail = jqEvent.detail;
 		detail.events = this.findEventsAtTime(detail.date, detail.locationId);
 		this.$el.trigger(jqEvent, [this]);
 	},
-	handleIntersectionContextMenu: function(e) {
+	handleIntersectionContextMenu: function (e) {
 		e.preventDefault();
 		if (this.rmbCancelsAdding && this.isAdding()) {
 			return this.cancelAdding();
 		}
 		var jqEvent = this.makeMouseEvent('intersection:contextmenu.skedtape', e, {
-			detail: { component: this }
+			detail: {
+				component: this
+			}
 		});
 		var detail = jqEvent.detail;
 		detail.events = this.findEventsAtTime(detail.date, detail.locationId);
 		this.$el.trigger(jqEvent, [this]);
 	},
-	completeAdding: function(e) {
+	completeAdding: function (e) {
 		var event = this.dummyEvent;
 		// Check for collisions
 		if (this.collide(event)) {
 			var jqEvent = this.makeMouseEvent('event:dragEndRefused.skedtape', e, {
-				detail: { component: this, event: event }
+				detail: {
+					component: this,
+					event: event
+				}
 			});
 			this.$el.trigger(jqEvent, [this]);
 			return;
 		}
 		// Emit the event coming before actual addition
 		var jqEvent = this.makeMouseEvent('event:dragEnd.skedtape', e, {
-			detail: { component: this, event: event }
+			detail: {
+				component: this,
+				event: event
+			}
 		});
 		this.$el.trigger(jqEvent, [this]);
 		// Add event if the operation hasn't been canceled by any event handler
@@ -1015,29 +1061,37 @@ SkedTape.prototype = {
 			// At this step there something may have changed by
 			// the callback above, so do the collision check again.
 			try {
-				var newEvent = this.addEvent(event, {preserveId: true, update: true});
+				var newEvent = this.addEvent(event, {
+					preserveId: true,
+					update: true
+				});
 				delete event.duration;
 				delete this.dummyEvent;
 				this.$dummyEvent.remove();
 				delete this.$dummyEvent;
 				var jqEvent = this.makeMouseEvent('event:dragEnded.skedtape', e, {
-					detail: { component: this, event: newEvent }
+					detail: {
+						component: this,
+						event: newEvent
+					}
 				});
 				this.$el.trigger(jqEvent, [this]);
 				this.rerenderLocations();
-			}
-			catch (e) {
+			} catch (e) {
 				if (e.name !== 'SkedTape.CollisionError') {
 					throw e;
 				}
 				var jqEvent = this.makeMouseEvent('event:dragEndRefused.skedtape', e, {
-					detail: { component: this, event: event }
+					detail: {
+						component: this,
+						event: event
+					}
 				});
 				this.$el.trigger(jqEvent, [this]);
 			}
 		}
 	},
-	handleTimelineClick: function(e) {
+	handleTimelineClick: function (e) {
 		if (eventFromEvent(e)) return;
 		if (this.isAdding()) {
 			if (this.dummyEvent.location) {
@@ -1045,19 +1099,23 @@ SkedTape.prototype = {
 			}
 		} else {
 			var jqEvent = this.makeMouseEvent('timeline:click.skedtape', e, {
-				detail: { component: this }
+				detail: {
+					component: this
+				}
 			});
 			this.$el.trigger(jqEvent, [this]);
 		}
 	},
-	handleTimelineContextMenu: function(e) {
+	handleTimelineContextMenu: function (e) {
 		if (eventFromEvent(e)) return;
 		e.preventDefault();
 		if (this.rmbCancelsAdding && this.isAdding()) {
 			return this.cancelAdding();
 		}
 		var jqEvent = this.makeMouseEvent('timeline:contextmenu.skedtape', e, {
-			detail: { component: this }
+			detail: {
+				component: this
+			}
 		});
 		this.$el.trigger(jqEvent, [this]);
 	},
@@ -1066,7 +1124,7 @@ SkedTape.prototype = {
 	 *
 	 * @param {object} picked The position info returned by the pick() function.
 	 */
-	moveDummyEvent: function(picked) {
+	moveDummyEvent: function (picked) {
 		var event = this.dummyEvent;
 		var start = picked.date;
 		if (this.snapToMins) {
@@ -1088,21 +1146,20 @@ SkedTape.prototype = {
 			}
 		}
 	},
-	handleMouseMove: function(e) {
+	handleMouseMove: function (e) {
 		this.lastPicked = this.pick(e);
 		if (!this.isAdding()) return;
 		this.moveDummyEvent(this.lastPicked);
 		this.updateDummyEvent();
 	},
-	handleKeyDown: function(e) {
+	handleKeyDown: function (e) {
 		if (e.key === '+') {
 			this.zoomIn();
-		}
-		else if (e.key === '-') {
+		} else if (e.key === '-') {
 			this.zoomOut();
 		}
 	},
-	handleWheel: function(e) {
+	handleWheel: function (e) {
 		if (e.ctrlKey) {
 			if (e.originalEvent.deltaY < 0) {
 				this.zoomIn();
@@ -1118,13 +1175,15 @@ SkedTape.prototype = {
 				delta += this.$frame.finish().scrollLeft() - scrollLeft;
 				this.$frame.scrollLeft(scrollLeft);
 			}
-			this.$frame.animate({ scrollLeft: '+=' + delta }, 200);
+			this.$frame.animate({
+				scrollLeft: '+=' + delta
+			}, 200);
 			return false;
 		}
 	}
 };
 
-SkedTape.CollisionError = function(id) {
+SkedTape.CollisionError = function (id) {
 	this.message = 'Collision with entry #' + id;
 	this.eventId = id;
 	// Use V8's native method if available, otherwise fallback
@@ -1147,41 +1206,50 @@ var SHORT_DURATION = 2 * MS_PER_HOUR - 1; // < this ? .sked-tape__date--short
 function eventFromEvent(e) {
 	return !!$(e.target).closest('.sked-tape__event, .sked-tape__intersection').length;
 }
+
 function isValidTimeRange(start, end) {
 	var correctTypes = start instanceof Date && end instanceof Date;
 	var correctOrder = start <= end;
 	return correctTypes && correctOrder;
 }
+
 function getDurationHours(start, end) {
 	return (end.getTime() - start.getTime()) / 1000 / 60 / 60;
 }
+
 function getMsFromMidnight(d) {
-	var secs = d.getHours()*60*60 + d.getMinutes()*60 + d.getSeconds();
+	var secs = d.getHours() * 60 * 60 + d.getMinutes() * 60 + d.getSeconds();
 	return secs * 1000 + d.getMilliseconds();
 }
+
 function getMsToMidnight(d) {
 	return MS_PER_DAY - getMsFromMidnight(d);
 }
+
 function getMidnightAfter(d) {
 	d = new Date(d);
 	d.setTime(d.getTime() + getMsToMidnight(d));
 	return d;
 }
+
 function getMidnightBefore(d) {
 	d = new Date(d);
 	d.setTime(d.getTime() - getMsFromMidnight(d));
 	return d;
 }
+
 function gapBetween(a, b) {
-	var min = a.start < b.start  ? a : b;
+	var min = a.start < b.start ? a : b;
 	var max = min === a ? b : a;
 	return max.start - min.end;
 }
+
 function floorHours(date) {
 	var floor = new Date(date);
 	floor.setHours(date.getHours(), 0, 0, 0);
 	return floor;
 }
+
 function ceilHours(date) {
 	var floor = floorHours(date);
 	if (floor < date) { // not equal
@@ -1192,11 +1260,11 @@ function ceilHours(date) {
 
 // ---------------------------- jQuery plugin ----------------------------------
 
-$.fn.skedTape = function(opts) {
+$.fn.skedTape = function (opts) {
 	var cmd = opts && (typeof opts === 'string' || opts instanceof String) ? opts : '';
 	opts = opts && !cmd && typeof opts === 'object' ? $.extend({}, opts) : {};
 	var args = cmd ? Array.prototype.slice.call(arguments, 1) : [];
-	return this.each(function() {
+	return this.each(function () {
 		var obj = $(this).data($.fn.skedTape.dataKey);
 		if (!obj || !cmd) {
 			if (cmd) {
@@ -1214,9 +1282,16 @@ $.fn.skedTape = function(opts) {
 			delete objOpts.end;
 			delete objOpts.deferRender;
 			obj = new SkedTape(objOpts);
-			opts.start && opts.end && obj.setTimespan(opts.start, opts.end, {update: false});
-			opts.locations && obj.setLocations(opts.locations, {update: false});
-			opts.events && obj.setEvents(opts.events, {update: false, allowCollisions: true});
+			opts.start && opts.end && obj.setTimespan(opts.start, opts.end, {
+				update: false
+			});
+			opts.locations && obj.setLocations(opts.locations, {
+				update: false
+			});
+			opts.events && obj.setEvents(opts.events, {
+				update: false,
+				allowCollisions: true
+			});
 			$(this).data($.fn.skedTape.dataKey, obj);
 			opts.deferRender || obj.render();
 		} else {
@@ -1227,7 +1302,7 @@ $.fn.skedTape = function(opts) {
 					break;
 				default:
 					var methods = [
-						'addEvent',  'addEvents', 'removeEvent', 'setEvents',
+						'addEvent', 'addEvents', 'removeEvent', 'setEvents',
 						'removeAllEvents', 'enterEditMode', 'leaveEditMode',
 						'startAdding', 'cancelAdding', 'setLocations',
 						'addLocation', 'addLocations', 'removeLocation',
@@ -1246,7 +1321,7 @@ $.fn.skedTape = function(opts) {
 };
 
 function findIntersection(a, b) {
-	var min = a.start < b.start  ? a : b;
+	var min = a.start < b.start ? a : b;
 	var max = min == a ? b : a;
 
 	//min ends before max starts -> no intersection
@@ -1357,7 +1432,9 @@ $.fn.skedTape.defaults = {
 	 * 
 	 * @see beforeAddIntoLocation()
 	 */
-	canAddIntoLocation: function(location, event) { return true; },
+	canAddIntoLocation: function (location, event) {
+		return true;
+	},
 	/**
 	 * Invoked after getting a positive result from the `canAddIntoLocation()`
 	 * hook just before updating the event. Here you can place any logic that
@@ -1365,7 +1442,7 @@ $.fn.skedTape.defaults = {
 	 * 
 	 * @see canAddIntoLocation()
 	 */
-	beforeAddIntoLocation: function(location, event) {},
+	beforeAddIntoLocation: function (location, event) {},
 	/**
 	 * The mixin is applied to every location's DOM element when rendering the sidebar.
 	 * The callback takes 3 arguments: jQuery text element node representing
@@ -1375,7 +1452,7 @@ $.fn.skedTape.defaults = {
 	 * The value of the last argument is undefined if the function is called
 	 * while no event is being dragged.
 	 */
-	postRenderLocation: function($el, location, canAdd) {
+	postRenderLocation: function ($el, location, canAdd) {
 		SkedTape.prototype.postRenderLocation.call(this, $el, location, canAdd);
 	},
 	/**
@@ -1385,9 +1462,11 @@ $.fn.skedTape.defaults = {
 	 * replace it with your own code that modifies the default representation of
 	 * events on a timeline.
 	 */
-	postRenderEvent: function($event, event) {},
+	postRenderEvent: function ($event, event) {},
 };
 
-$.skedTape = function(opts) {
-	return $('<div/>').skedTape($.extend({}, opts || {}, {deferRender: true}));
+$.skedTape = function (opts) {
+	return $('<div/>').skedTape($.extend({}, opts || {}, {
+		deferRender: true
+	}));
 };
