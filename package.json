@@ -1,8 +1,9 @@
 {
   "name": "@ch-zacmo/jquery-sked-tape",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Schedule component for jQuery that represents events in tape manner.",
   "main": "dist/jquery.skedTape.js",
+  "module": "dist/jquery.skedTape.esm.js",
   "style": "dist/jquery.skedTape.css",
   "scripts": {
     "build": "gulp build",
@@ -29,8 +30,11 @@
   },
   "homepage": "https://github.com/ch-zacmo/jquery-sked-tape#readme",
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "gulp": "^5.0.0",
     "gulp-autoprefixer": "^9.0.0",
+    "gulp-babel": "^8.0.0",
     "gulp-clean-dest": "^0.2.0",
     "gulp-connect": "^5.0.0",
     "gulp-header-comment": "^0.10.0",
@@ -352,9 +356,9 @@
     "stream-exhaust": "^1.0.2",
     "stream-shift": "^1.0.3",
     "streamx": "^2.21.1",
+    "string_decoder": "^1.3.0",
     "string-template": "^0.2.1",
     "string-width": "^4.2.3",
-    "string_decoder": "^1.3.0",
     "strip-ansi": "^6.0.1",
     "strip-bom": "^2.0.0",
     "strip-bom-string": "^1.0.0",

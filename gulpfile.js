@@ -14,6 +14,7 @@ import headerComment from 'gulp-header-comment';
 import rename from 'gulp-rename';
 import terser from 'gulp-terser';
 import stripCssComments from 'gulp-strip-css-comments';
+import babel from 'gulp-babel';
 
 const sass = gulpSass(dartSass);
 
@@ -61,6 +62,30 @@ const buildSass = (minify) => () => {
 gulp.task('sass', buildSass(false))
 gulp.task('sass:min', buildSass(true))
 
+// ESM
+const buildEsm = () => {
+    return gulp.src('src/*.js') 
+        .pipe(plumber(plumberErrorHandler))
+        .pipe(babel({
+            presets: ['@babel/preset-env'], 
+            plugins: [] 
+        }))
+        .pipe(rename({
+            suffix: '.esm' 
+        }))
+        .pipe(headerComment(`
+            jQuery.skedTape ESM v<%= pkg.version %>
+            License: <%= pkg.license %>
+            Author: <%= pkg.author %>
+        `))
+        .pipe(gulp.dest('dist')) 
+        .pipe(gulpif(TASK_NOTIFICATION, notify({
+            message: 'ESM built'
+        })));
+};
+
+gulp.task('build-esm', buildEsm);
+
 const copyJs = (minify) => () => {
 	return gulp.src(`src/*.js`)
 		.pipe(plumber(plumberErrorHandler))
@@ -107,7 +132,7 @@ gulp.task('watch', () => {
 		livereload: true
 	});
 	gulp.watch('src/*.sass', gulp.parallel('sass', 'sass:min'))
-	gulp.watch('src/*.js', gulp.parallel('copy-js', 'copy-js:min'))
+	gulp.watch('src/*.js', gulp.parallel('copy-js', 'copy-js:min', 'build-esm'))
 	gulp.watch('dist/*', gulp.parallel('dist-to-docs'))
 	// Open browser
 	gulp.src(__filename).pipe(open({
@@ -116,7 +141,7 @@ gulp.task('watch', () => {
 })
 
 gulp.task('build', gulp.series(
-	gulp.parallel('sass', 'sass:min', 'copy-js', 'copy-js:min'),
+	gulp.parallel('sass', 'sass:min', 'copy-js', 'copy-js:min', 'build-esm'),
 	'dist-to-docs'
 ))
 
