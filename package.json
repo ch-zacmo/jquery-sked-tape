@@ -1,6 +1,6 @@
 {
   "name": "jquery-sked-tape",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Schedule component for jQuery that represents events in tape manner.",
   "main": "dist/jquery.skedTape.js",
   "style": "dist/jquery.skedTape.css",
@@ -10,13 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lexkrstn/jquery-sked-tape.git"
+    "url": "git+https://github.com/ch-zacmo/jquery-sked-tape.git"
   },
   "keywords": [
     "schedule",
     "jquery"
   ],
   "author": "Alexander Korostin <lexkrstn@gmail.com>",
+  "contributors": ["Zacharie Monnet <zacmonnet@gmail.com>"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/lexkrstn/jquery-sked-tape/issues"
