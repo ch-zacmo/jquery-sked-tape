@@ -1,5 +1,5 @@
 /**
- * jQuery.skedTape ESM v2.7.0
+ * jQuery.skedTape ESM v2.8.0
  * License: MIT
  * Author: Alexander Korostin <lexkrstn@gmail.com>
  */
