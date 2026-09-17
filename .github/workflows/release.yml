@@ -36,12 +36,14 @@ jobs:
           }
           NODE
       - run: npm ci
-      - run: npm run test:tooling
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
       - name: Build and package
         run: |
           mkdir -p release-assets
           npm pack --pack-destination release-assets
-          zip -r "release-assets/jquery-sked-tape-${TAG}-dist.zip" dist LICENSE README.md CHANGELOG
+          zip -r "release-assets/jquery-sked-tape-${TAG}-dist.zip" dist LICENSE README.md MIGRATION.md CHANGELOG
           cd release-assets
           sha256sum *.zip *.tgz > SHA256SUMS.txt
       - name: Publish GitHub release
