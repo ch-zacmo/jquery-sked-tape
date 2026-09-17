@@ -1223,7 +1223,7 @@ function eventFromEvent(e) {
 
 function isValidTimeRange(start, end) {
 	var correctTypes = start instanceof Date && end instanceof Date;
-	var correctOrder = start <= end;
+	var correctOrder = start < end;
 	return correctTypes && correctOrder;
 }
 
