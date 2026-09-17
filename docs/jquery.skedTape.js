@@ -251,7 +251,6 @@ SkedTape.prototype = {
 		}
 
 		var newEvent = {
-			id: ++this.lastEventId,
 			name: entry.name,
 			location: entry.location + '',
 			start: start,
@@ -265,13 +264,15 @@ SkedTape.prototype = {
 			userData: $.extend({}, entry.userData || {})
 		};
 
-		if (opts && opts.preserveId && entry.id) {
+		if (opts && opts.preserveId && entry.id !== undefined && entry.id !== null) {
 			if (this.getEvent(entry.id)) {
 				throw new Error('Cannot preserve id: already exists');
 			}
 			newEvent.id = entry.id;
 		} else {
-			newEvent.id = ++this.lastEventId;
+			do {
+				newEvent.id = ++this.lastEventId;
+			} while (this.getEvent(newEvent.id));
 		}
 
 		if (!opts || !opts.allowCollisions) {
