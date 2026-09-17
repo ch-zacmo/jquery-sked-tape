@@ -1,23 +1,35 @@
 {
   "name": "@ch-zacmo/jquery-sked-tape",
-  "version": "2.8.1",
+  "version": "3.0.0",
   "description": "Schedule component for jQuery that represents events in tape manner.",
   "main": "dist/jquery.skedTape.js",
-  "module": "dist/jquery.skedTape.esm.js",
+  "module": "dist/jquery.skedTape.esm.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/jquery.skedTape.esm.mjs",
+      "require": "./dist/jquery.skedTape.js"
+    },
+    "./dist/jquery.skedTape.esm.js": "./dist/jquery.skedTape.esm.mjs",
+    "./dist/*": "./dist/*",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
   "style": "dist/jquery.skedTape.css",
   "files": [
     "dist/",
     "src/",
-    "CHANGELOG"
+    "CHANGELOG",
+    "MIGRATION.md"
   ],
   "engines": {
-    "node": ">=22"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
     "prepack": "npm run build",
     "dev": "node scripts/dev.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "test:browser": "node --test tests/browser.mjs"
   },
   "repository": {
     "type": "git",
@@ -40,12 +52,17 @@
   },
   "homepage": "https://github.com/ch-zacmo/jquery-sked-tape#readme",
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@babel/preset-env": "^7.29.7",
     "autoprefixer": "^10.6.1",
+    "bootstrap": "5.3.8",
+    "jquery": "4.0.0",
+    "jsdom": "^30.1.0",
+    "playwright": "^1.63.0",
     "postcss": "^8.5.28",
-    "terser": "^5.51.2",
-    "sass": "^1.104.1"
+    "sass": "^1.104.1",
+    "terser": "^5.51.2"
+  },
+  "peerDependencies": {
+    "jquery": "^4.0.0"
   },
   "directories": {
     "doc": "docs"

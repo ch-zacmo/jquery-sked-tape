@@ -1,7 +1,6 @@
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { transformAsync } from '@babel/core';
 import * as sass from 'sass';
 import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
@@ -35,11 +34,8 @@ export async function build() {
     files.set('jquery.skedTape.min.js', js.code);
     files.set('jquery.skedTape.min.js.map', js.map);
     
-    // Preserve the existing distribution until the separate ESM/jQuery migration.
-    const esm = await transformAsync(source, {
-        presets: ['@babel/preset-env'], cwd: root, configFile: false, babelrc: false
-    });
-    files.set('jquery.skedTape.esm.js', banner(' ESM') + esm.code + '\n');
+    const esm = `import $ from 'jquery';\n\n${source}\n\nexport default $;\n`;
+    files.set('jquery.skedTape.esm.mjs', banner(' ESM') + esm);
 
     for (const compressed of [false, true]) {
         const name = `jquery.skedTape${compressed ? '.min' : ''}.css`;
@@ -71,6 +67,11 @@ export async function build() {
     // Compile everything before replacing any published files.
     await mkdir(path.join(root, 'dist'), { recursive: true });
     await mkdir(path.join(root, 'docs'), { recursive: true });
+
+    
+    for (const directory of ['dist', 'docs']) {
+        await rm(path.join(root, directory, 'jquery.skedTape.esm.js'), { force: true });
+    }
 
     const demoFiles = new Set(['jquery.skedTape.js', 'jquery.skedTape.css']);
 

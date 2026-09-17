@@ -1,4 +1,4 @@
-/*! jQuery.skedTape v2.8.1
+/*! jQuery.skedTape v3.0.0
  * License: MIT
  * Author: Alexander Korostin <lexkrstn@gmail.com>
  */
@@ -10,15 +10,13 @@
         // Node/CommonJS
         module.exports = function( root, jQuery ) {
             if ( jQuery === undefined ) {
-                // require('jQuery') returns a factory that requires window to
-                // build a jQuery instance, we normalize how we use modules
-                // that require this pattern but the window provided is a noop
-                // if it's defined (how jquery works)
-                if ( typeof window !== 'undefined' ) {
+                if ( root && root.document ) {
+                    jQuery = require('jquery/factory').jQueryFactory(root);
+                } else if ( typeof window !== 'undefined' ) {
                     jQuery = require('jquery');
                 }
                 else {
-                    jQuery = require('jquery')(root);
+                    throw new Error('skedTape requires a DOM window or a jQuery instance');
                 }
             }
             factory(jQuery);
@@ -29,7 +27,11 @@
         factory(jQuery);
     }
 }(function ($) {
-	var CURRENT_TZ_OFFSET = new Date().getTimezoneOffset();
+	if (!$ || !$.fn || !$.fn.animate || !$.fn.queue) {
+	throw new Error('skedTape requires the full build of jQuery 4');
+}
+
+var CURRENT_TZ_OFFSET = new Date().getTimezoneOffset();
 
 var SkedTape = function (opts) {
 	$.extend(this, opts);
@@ -42,15 +44,15 @@ var SkedTape = function (opts) {
 	this.lastEventId = 0;
 	this.format = $.extend({}, SkedTape.defaultFormatters, (opts && opts.formatters) || {});
 
-	this.$el.on('click', '.sked-tape__event', $.proxy(this.handleEventClick, this));
-	this.$el.on('contextmenu', '.sked-tape__event', $.proxy(this.handleEventContextMenu, this));
-	this.$el.on('click', '.sked-tape__timeline-wrap', $.proxy(this.handleTimelineClick, this));
-	this.$el.on('contextmenu', '.sked-tape__timeline-wrap', $.proxy(this.handleTimelineContextMenu, this));
-	this.$el.on('mousemove', '.sked-tape__timeline-wrap', $.proxy(this.handleMouseMove, this));
-	this.$el.on('keydown', '.sked-tape__time-frame', $.proxy(this.handleKeyDown, this));
-	this.$el.on('wheel', '.sked-tape__time-frame', $.proxy(this.handleWheel, this));
-	this.$el.on('click', '.sked-tape__intersection', $.proxy(this.handleIntersectionClick, this));
-	this.$el.on('contextmenu', '.sked-tape__intersection', $.proxy(this.handleIntersectionContextMenu, this));
+	this.$el.on('click.skedTapeInternal', '.sked-tape__event', this.handleEventClick.bind(this));
+	this.$el.on('contextmenu.skedTapeInternal', '.sked-tape__event', this.handleEventContextMenu.bind(this));
+	this.$el.on('click.skedTapeInternal', '.sked-tape__timeline-wrap', this.handleTimelineClick.bind(this));
+	this.$el.on('contextmenu.skedTapeInternal', '.sked-tape__timeline-wrap', this.handleTimelineContextMenu.bind(this));
+	this.$el.on('mousemove.skedTapeInternal', '.sked-tape__timeline-wrap', this.handleMouseMove.bind(this));
+	this.$el.on('keydown.skedTapeInternal', '.sked-tape__time-frame', this.handleKeyDown.bind(this));
+	this.$el.on('wheel.skedTapeInternal', '.sked-tape__time-frame', this.handleWheel.bind(this));
+	this.$el.on('click.skedTapeInternal', '.sked-tape__intersection', this.handleIntersectionClick.bind(this));
+	this.$el.on('contextmenu.skedTapeInternal', '.sked-tape__intersection', this.handleIntersectionContextMenu.bind(this));
 };
 
 SkedTape.defaultFormatters = {
@@ -297,12 +299,12 @@ SkedTape.prototype = {
 		return this.removeAllEvents(opts).addEvents(entries, opts);
 	},
 	removeEvent: function (eventId, opts) {
-		$.each(this.events, $.proxy(function (i, event) {
+		$.each(this.events, (i, event) => {
 			if (event.id == eventId) {
 				this.events.splice(i, 1);
 				return false;
 			}
-		}, this));
+		});
 		return this.updateUnlessOption(opts);
 	},
 	removeAllEvents: function (opts) {
@@ -315,12 +317,12 @@ SkedTape.prototype = {
 	},
 	getEvent: function (id) {
 		var found = null;
-		$.each(this.events, $.proxy(function (i, event) {
+		$.each(this.events, (i, event) => {
 			if (event.id == id) {
 				found = event;
 				return false;
 			}
-		}, this));
+		});
 		return found;
 	},
 	isEditMode: function () {
@@ -403,10 +405,10 @@ SkedTape.prototype = {
 		return $location;
 	},
 	renderLocations: function () {
-		var $frag = $(document.createDocumentFragment());
-		$.each(this.getLocations(), $.proxy(function (i, location) {
+		var $frag = $(this.el.ownerDocument.createDocumentFragment());
+		$.each(this.getLocations(), (i, location) => {
 			this.renderLocation(location).appendTo($frag);
-		}, this));
+		});
 		return $frag;
 	},
 	postRenderLocation: function ($el, location, canAdd) {
@@ -525,11 +527,11 @@ SkedTape.prototype = {
 		this.$timeline = $('<ul class="sked-tape__timeline"/>');
 		// Sort the events by time ascending so that the gap between each two of
 		// them may be determined in a cycle.
-		var events = this.events.sort($.proxy(function (a, b) {
+		var events = this.events.sort((a, b) => {
 			return a.start.getTime() - b.start.getTime();
-		}, this));
+		});
 		this.timeIndicators = {};
-		$.each(this.getLocations(), $.proxy(function (i, location) {
+		$.each(this.getLocations(), (i, location) => {
 			var $li = $('<li class="sked-tape__event-row"/>')
 				.data('locationId', location.id)
 				.appendTo(this.$timeline);
@@ -548,7 +550,7 @@ SkedTape.prototype = {
 				var visible = event.end > this.start && event.start < this.end;
 				if (belongs && visible) {
 					var intersects = false;
-					$.each(intersections, $.proxy(function (i, intersection) {
+					$.each(intersections, (i, intersection) => {
 						$.each(intersection.events, function (j, jEvent) {
 							if (jEvent.id == event.id) {
 								intersects = true;
@@ -556,7 +558,7 @@ SkedTape.prototype = {
 							}
 						});
 						if (intersects) return false;
-					}, this));
+					});
 					var gap = event.start.getTime() - lastEndTime;
 					if (gap >= this.minTimeGapShown && gap <= this.maxTimeGapShown && !intersects) {
 						$li.append(this.renderGap(gap, lastEnd, event.start));
@@ -573,7 +575,7 @@ SkedTape.prototype = {
 					}
 				}
 			}, this);
-		}, this));
+		});
 		this.renderIntersections();
 		return this.$timeline;
 	},
@@ -581,11 +583,11 @@ SkedTape.prototype = {
 		// Remove the stale ones
 		this.$timeline.find('.sked-tape__intersection').remove();
 		// Render the new ones
-		this.$timeline.find('.sked-tape__event-row').each($.proxy(function (i, row) {
+		this.$timeline.find('.sked-tape__event-row').each((i, row) => {
 			var $row = $(row);
 			var locationId = $row.data('locationId');
 			var intersections = this.getIntersections(locationId);
-			$.each(intersections, $.proxy(function (i, intersection) {
+			$.each(intersections, (i, intersection) => {
 				if (intersection.end > this.start && intersection.start < this.end) {
 					$('<div class="sked-tape__intersection"/>')
 						.css({
@@ -595,8 +597,8 @@ SkedTape.prototype = {
 						.data('events', intersection.events)
 						.appendTo($row);
 				}
-			}, this));
-		}, this));
+			});
+		});
 	},
 	renderGap: function (gap, start, end) {
 		var block = {
@@ -772,7 +774,7 @@ SkedTape.prototype = {
 				left: '-10000px',
 				top: '-10000px'
 			})
-			.appendTo(document.body);
+			.appendTo(this.el.ownerDocument.body);
 		$event.data('min-width', $loose.outerWidth());
 		$loose.remove();
 		// Execute the hook
@@ -842,7 +844,7 @@ SkedTape.prototype = {
 			}
 			return false;
 		};
-		$.each(this.events, $.proxy(function (i, iEvent) {
+		$.each(this.events, (i, iEvent) => {
 			if (iEvent.location != location) {
 				return; // Skip all the events of the other locations
 			}
@@ -859,18 +861,18 @@ SkedTape.prototype = {
 					intersections.push(intersection);
 				}
 			}
-		}, this));
+		});
 		return intersections;
 	},
 	destroy: function () {
 		this.cleanup();
-		this.$el.off().empty().removeClass('sked-tape sked-tape--has-dates');
+		this.$el.off('.skedTapeInternal').empty().removeClass('sked-tape sked-tape--has-dates');
 	},
 	cleanup: function () {
-		if ($.fn.popover) {
-			this.$el.find('.sked-tape__event')
-				.popover(TWBS_MAJOR >= 4 ? 'dispose' : 'destroy');
-		}
+		clearTimeout(this.popoverTimeout);
+		delete this.popoverTimeout;
+		(this.popovers || []).forEach(popover => popover.dispose());
+		this.popovers = [];
 		if (this.indicatorTimeout) {
 			clearInterval(this.indicatorTimeout);
 			delete this.indicatorTimeout;
@@ -890,17 +892,19 @@ SkedTape.prototype = {
 		this.renderTimeWrap(oldScrollLeft);
 		this.updateTimeIndicatorsPos();
 
-		this.indicatorTimeout = setInterval($.proxy(function () {
+		this.indicatorTimeout = setInterval(() => {
 			this.updateTimeIndicatorsPos();
-		}, this), 1000);
+		}, 1000);
 
-		setTimeout($.proxy(function () {
-			var bodyClass = TWBS_MAJOR >= 4 ? 'body' : 'content';
-			var template = '<div class="popover" role="tooltip">' +
-				'<div class="arrow"></div>' +
-				'<div class="popover-' + bodyClass + '"></div>' +
-				'</div>';
-			this.$el.find('.sked-tape__event').each($.proxy(function (i, el) {
+		this.popoverTimeout = setTimeout(() => {
+			var view = this.el.ownerDocument.defaultView;
+			var Popover = this.popoverConstructor ||
+				(view.bootstrap && view.bootstrap.Popover) ||
+				($.fn.popover && $.fn.popover.Constructor);
+			if (!Popover || parseInt(Popover.VERSION, 10) !== 5 || this.showPopovers === 'never') {
+				return;
+			}
+			this.$el.find('.sked-tape__event').each((i, el) => {
 				var $entry = $(el);
 				var tooSmall = $entry.width() < $entry.data('min-width');
 				var left = parseFloat($entry[0].style.left);
@@ -908,19 +912,17 @@ SkedTape.prototype = {
 				var TOLERANCE = 0.01;
 				var overflows = left < -TOLERANCE || right > 100 + TOLERANCE;
 				if (
-					$.fn.popover && this.showPopovers !== 'never' &&
 					(tooSmall || overflows || this.showPopovers === 'always')
 				) {
-					$entry.popover({
+					this.popovers.push(new Popover(el, {
 						trigger: 'hover',
 						content: $entry.find('.sked-tape__center').html(),
 						html: true,
-						template: template,
 						placement: left < 50 ? 'right' : 'left'
-					});
+					}));
 				}
-			}, this));
-		}, this), 0);
+			});
+		}, 0);
 
 		return this;
 	},
@@ -1227,7 +1229,6 @@ SkedTape.CollisionError.prototype = Object.create(Error.prototype);
 SkedTape.CollisionError.prototype.name = "SkedTape.CollisionError";
 SkedTape.CollisionError.prototype.constructor = SkedTape.CollisionError;
 
-var TWBS_MAJOR = $.fn.popover ? parseInt($.fn.popover.Constructor.VERSION.charAt(0), 10) : 0;
 var SECS_PER_DAY = 24 * 60 * 60;
 var MS_PER_DAY = SECS_PER_DAY * 1000;
 var MS_PER_MINUTE = 60 * 1000;
@@ -1455,6 +1456,8 @@ $.fn.skedTape.defaults = {
 	 * options are: "default", "always" or "never".
 	 */
 	showPopovers: 'default',
+	// Bootstrap 5 Popover constructor for module-based applications.
+	popoverConstructor: null,
 	/**
 	 * The hook invoked to determine whether an event may be added to a location.
 	 * The default implementation always returns *true*.
@@ -1501,4 +1504,6 @@ $.skedTape = function (opts) {
 		deferRender: true
 	}));
 };
+
+    return $;
 }));
