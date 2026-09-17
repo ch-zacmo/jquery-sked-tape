@@ -975,13 +975,13 @@ SkedTape.prototype = {
 			this.$el.trigger(jqEvent, [this]);
 			// Remove it from the timeline and begin positioning
 			this.removeEvent(eventId);
-			this.startAdding({
-				id: event.id,
-				name: event.name,
+			this.startAdding($.extend({}, event, {
 				duration: event.end.getTime() - event.start.getTime(),
+				data: event.data ? $.extend({}, event.data) : null,
+				style: $.extend({}, event.style),
 				userData: $.extend({}, event.userData || {}),
 				draggedEvent: event
-			});
+			}));
 		}
 	},
 	handleEventClick: function (e) {
