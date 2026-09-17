@@ -5,6 +5,17 @@ Schedule component for jQuery that represents events in tape manner.
 
 Forked from : [lexkrstn/jquery-sked-tape](https://github.com/lexkrstn/jquery-sked-tape)
 
+
+### Upgrading to v3
+
+Version 3 requires the full build of jQuery 4. Older jQuery versions are not
+guaranteed. See [MIGRATION.md](MIGRATION.md) for API usage changes.
+
+With ES modules, use `import $ from '@ch-zacmo/jquery-sked-tape'`, then call
+`$('#sked').skedTape(options)`. CommonJS exports a registration function:
+`const $ = require('@ch-zacmo/jquery-sked-tape')(window)`.
+For a browser script, load `dist/jquery.skedTape.js` after jQuery.
+
 ### API
 
 #### Initialization
@@ -70,6 +81,9 @@ var $sked = $('#sked').skedTape({
 - `showPopovers` (_"default"|"always"|"never"_) The default behavior is to show
   pop-ups for events that are either too small to be visible or partially
   outside the timeline.
+- `popoverConstructor` (_function|null_) Optional Bootstrap 5 `Popover` constructor
+  for module-based applications. Otherwise the component detects `bootstrap.Popover`
+  or Bootstrap 5's jQuery bridge. Without a constructor, popovers are omitted.
 
 **Available event object options**:
 - `name` (_string_)
@@ -148,7 +162,40 @@ object itself - it won't work.
   free to replace it with your own code that modifies the default representation
   of events on a timeline.
 
-### Development deploy
-1. `npm i -g gulp-cli`
-2. `npm i`
-3. `gulp build` (AOT) or `gulp` (JIT)
+### Development
+
+Use Node.js 22.22.2+, 24.15.0+ (LTS), or 26+ for development.
+
+1. `npm ci`
+2. `npm run build` to generate JavaScript, CSS and source maps in `dist/`. Only `jquery.skedTape.js` and `jquery.skedTape.css`, used by the demo, are copied to `docs/` without source map references.
+3. `npm run dev` to build and serve the demo at http://127.0.0.1:8080.
+
+`npm test` builds and checks the jQuery 4 distributions and component API.
+`npm run test:browser` checks the demo and ESM in Chromium (provision it with
+`npx playwright install chromium`). Set `BROWSER_CHANNEL=msedge` to use an
+installed Edge browser. On Windows use `npm.cmd` and `npx.cmd`.
+
+The development server uses Node's built-in HTTP module. It checks source files,
+the UMD template and package metadata every second, rebuilds when they change,
+and reloads open demo pages after successful changes. 
+Edits to `docs/` also reload the browser.
+
+You can set the `PORT` env to change the default one.
+No global CLI or browser extension is required.
+
+### Releases
+
+`dist/` is generated and is not tracked anymore since v3. Run `npm run build` after cloning
+to generate it locally.
+
+- `jquery-sked-tape-v3.x.x-dist.zip`: compiled JavaScript, CSS, source maps and documentation.
+- An npm `.tgz` package, installable with `npm install <path-to-package.tgz>`.
+- `SHA256SUMS.txt`: checksums of both archives.
+
+### AI Usage
+
+I use AI tools to maintain this project. Code is reviewed and tested by me. 
+I do not accept pull requests from AI tools, but I do accept them from humans !
+
+
+

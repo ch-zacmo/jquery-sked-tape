@@ -1,0 +1,23 @@
+<!doctype html>
+<link rel="stylesheet" href="/jquery.skedTape.css">
+<div id="schedule"></div>
+
+<script type="importmap">
+    { "imports": { "jquery": "/jquery.module.js" } }
+</script>
+
+<script type="module">
+    import $ from '/dist/jquery.skedTape.esm.mjs';
+
+    $('#schedule').skedTape({
+        start: new Date(2026, 8, 17, 8),
+        end: new Date(2026, 8, 17, 18),
+        locations: [{ id: 'room', name: 'Room' }],
+        events: [{
+            name: 'ESM event',
+            location: 'room',
+            start: new Date(2026, 8, 17, 9),
+            end: new Date(2026, 8, 17, 10)
+        }]
+    });
+</script>

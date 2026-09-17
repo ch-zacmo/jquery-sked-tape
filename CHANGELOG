@@ -1,3 +1,11 @@
+## [3.0.0]
+### Changed
+- Target the full build of jQuery 4.
+- Provide a native ESM entry and a CommonJS factory using jquery/factory.
+- Use Bootstrap 5 popovers with an optional popoverConstructor setting.
+- Preserve application event handlers when destroying or reinitializing a component.
+- See MIGRATION.md for API usage changes.
+
 ## [2.6.0] 2024-12-18
 ### Added
 - Specific style can be applied for each event
