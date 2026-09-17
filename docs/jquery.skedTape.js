@@ -717,7 +717,15 @@ SkedTape.prototype = {
 			});
 		if (event && $oldEvent.length) {
 			var $newEvent = this.renderEvent(event);
+			$oldEvent.each((i, el) => {
+				var popover = this.popovers.get(el);
+				if (popover) {
+					popover.dispose();
+					this.popovers.delete(el);
+				}
+			});
 			$oldEvent.replaceWith($newEvent);
+			this.renderPopover($newEvent[0]);
 		} else {
 			// Adding an event (or removal one of them) entails rendering some
 			// other entities like time markers between events. We don't
@@ -872,8 +880,10 @@ SkedTape.prototype = {
 	cleanup: function () {
 		clearTimeout(this.popoverTimeout);
 		delete this.popoverTimeout;
-		(this.popovers || []).forEach(popover => popover.dispose());
-		this.popovers = [];
+		if (this.popovers) {
+			this.popovers.forEach(popover => popover.dispose());
+		}
+		this.popovers = new Map();
 		if (this.indicatorTimeout) {
 			clearInterval(this.indicatorTimeout);
 			delete this.indicatorTimeout;
@@ -898,34 +908,34 @@ SkedTape.prototype = {
 		}, 1000);
 
 		this.popoverTimeout = setTimeout(() => {
-			var view = this.el.ownerDocument.defaultView;
-			var Popover = this.popoverConstructor ||
-				(view.bootstrap && view.bootstrap.Popover) ||
-				($.fn.popover && $.fn.popover.Constructor);
-			if (!Popover || parseInt(Popover.VERSION, 10) !== 5 || this.showPopovers === 'never') {
-				return;
-			}
-			this.$el.find('.sked-tape__event').each((i, el) => {
-				var $entry = $(el);
-				var tooSmall = $entry.width() < $entry.data('min-width');
-				var left = parseFloat($entry[0].style.left);
-				var right = left + parseFloat($entry[0].style.width);
-				var TOLERANCE = 0.01;
-				var overflows = left < -TOLERANCE || right > 100 + TOLERANCE;
-				if (
-					(tooSmall || overflows || this.showPopovers === 'always')
-				) {
-					this.popovers.push(new Popover(el, {
-						trigger: 'hover',
-						content: $entry.find('.sked-tape__center').html(),
-						html: true,
-						placement: left < 50 ? 'right' : 'left'
-					}));
-				}
-			});
+			this.$el.find('.sked-tape__event').each((i, el) => this.renderPopover(el));
 		}, 0);
 
 		return this;
+	},
+	renderPopover: function (el) {
+		var view = this.el.ownerDocument.defaultView;
+		var Popover = this.popoverConstructor ||
+			(view.bootstrap && view.bootstrap.Popover) ||
+			($.fn.popover && $.fn.popover.Constructor);
+		if (!Popover || parseInt(Popover.VERSION, 10) !== 5 ||
+			this.showPopovers === 'never' || this.popovers.has(el)) {
+			return;
+		}
+		var $entry = $(el);
+		var tooSmall = $entry.width() < $entry.data('min-width');
+		var left = parseFloat(el.style.left);
+		var right = left + parseFloat(el.style.width);
+		var TOLERANCE = 0.01;
+		var overflows = left < -TOLERANCE || right > 100 + TOLERANCE;
+		if (tooSmall || overflows || this.showPopovers === 'always') {
+			this.popovers.set(el, new Popover(el, {
+				trigger: 'hover',
+				content: $entry.find('.sked-tape__center').html(),
+				html: true,
+				placement: left < 50 ? 'right' : 'left'
+			}));
+		}
 	},
 	update: function () {
 		return this.render({
