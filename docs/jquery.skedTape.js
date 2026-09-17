@@ -1,9 +1,7 @@
-/**
- * jQuery.skedTape v2.8.0
+/*! jQuery.skedTape v2.8.1
  * License: MIT
  * Author: Alexander Korostin <lexkrstn@gmail.com>
  */
-
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
@@ -1503,4 +1501,4 @@ $.skedTape = function (opts) {
 		deferRender: true
 	}));
 };
-}));
+}));
