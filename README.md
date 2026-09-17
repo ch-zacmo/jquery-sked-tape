@@ -5,6 +5,9 @@ Schedule component for jQuery that represents events in tape manner.
 
 Forked from : [lexkrstn/jquery-sked-tape](https://github.com/lexkrstn/jquery-sked-tape)
 
+
+### Upgrading to v3
+
 Version 3 requires the full build of jQuery 4. Older jQuery versions are not
 guaranteed. See [MIGRATION.md](MIGRATION.md) for API usage changes.
 
