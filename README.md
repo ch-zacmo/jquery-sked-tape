@@ -148,7 +148,30 @@ object itself - it won't work.
   free to replace it with your own code that modifies the default representation
   of events on a timeline.
 
-### Development deploy
-1. `npm i -g gulp-cli`
-2. `npm i`
-3. `gulp build` (AOT) or `gulp` (JIT)
+### Development
+
+Use Node.js >=22
+
+1. `npm ci`
+2. `npm run build` to generate JavaScript, CSS and source maps in `dist/`. Only `jquery.skedTape.js` and `jquery.skedTape.css`, used by the demo, are copied to `docs/` without source map references.
+3. `npm run dev` to build and serve the demo at http://127.0.0.1:8080.
+
+The development server uses Node's built-in HTTP module. It checks source files,
+the UMD template and package metadata every second, rebuilds when they change,
+and reloads open demo pages after successful changes. 
+Edits to `docs/` also reload the browser.
+
+You can set the `PORT` env to change the default one.
+No global CLI or browser extension is required.
+
+### Releases
+
+`dist/` is generated and is not tracked anymore since v3. Run `npm run build` after cloning
+to generate it locally.
+
+- `jquery-sked-tape-v3.x.x-dist.zip`: compiled JavaScript, CSS, source maps and documentation.
+- An npm `.tgz` package, installable with `npm install <path-to-package.tgz>`.
+- `SHA256SUMS.txt`: checksums of both archives.
+
+
+
